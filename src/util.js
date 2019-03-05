@@ -15,6 +15,22 @@ export const calculateNextPossibleScores = (currentScores, newCards) => {
   return calculateNextPossibleScores(nextScores, restCards);
 };
 
+export const hasBusted = possibleScores =>
+  possibleScores.every(score => score > 21);
+
+export const playerCanHit = possibleScores =>
+  possibleScores.some(score => score < 21);
+
+export const mustHit = possibleScores =>
+  possibleScores.some(score => score < 18);
+
+export const doesPlayerWin = (dealerScores, playerScores) => {
+  const dealerHigh = dealerScores.sort().find(score => score <= 21);
+  const playerHigh = dealerScores.sort().find(score => score <= 21);
+
+  return playerHigh > dealerHigh;
+};
+
 export const getNewDeckId = (n = 6) =>
   fetch(`https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=${n}`)
     .then(res => res.json())

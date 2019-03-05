@@ -3,19 +3,23 @@ import "./App.css";
 import Playerarea from "./PlayerArea";
 import DealerArea from "./DealerArea";
 import {
-  calculateCurrentScore,
   drawNCards,
   getNewDeckId,
-  calculateNextPossibleScores
+  calculateNextPossibleScores,
+  hasBusted,
+  mustHit,
+  playerCanHit,
+  doesPlayerWin
 } from "./util";
 
 class App extends Component {
   state = {
     deckId: null,
-    noInteract: false,
+    dealerPlaying: false,
     playerCards: [],
     dealerCards: [],
-    currentPossibleScores: [0]
+    currentPossibleScores: [0],
+    currentPossibleDealerScores: [0]
   };
 
   startNewGame = async () => {
@@ -33,15 +37,20 @@ class App extends Component {
     const dealerCards = [startingCards[2], startingCards[3]];
 
     const currentPossibleScores = calculateNextPossibleScores([0], playerCards);
+    const currentPossibleDealerScores = calculateNextPossibleScores(
+      [0],
+      dealerCards
+    );
 
     this.setState({
       playerCards,
       dealerCards,
-      currentPossibleScores
+      currentPossibleScores,
+      currentPossibleDealerScores
     });
   };
 
-  hit = async () => {
+  playerHit = async () => {
     const newCards = await drawNCards(this.state.deckId, 1);
 
     this.setState(prevState => ({
@@ -53,11 +62,53 @@ class App extends Component {
     }));
   };
 
-  stay = async () => {};
+  dealerHit = async () => {
+    const newCards = await drawNCards(this.state.deckId, 1);
+
+    this.setState(prevState => ({
+      dealerCards: [...prevState.dealerCards, ...newCards],
+      currentPossibleDealerScores: calculateNextPossibleScores(
+        prevState.currentPossibleDealerScores,
+        newCards
+      )
+    }));
+  };
+
+  stay = async () => {
+    this.setState({
+      dealerPlaying: true
+    });
+  };
 
   async componentDidMount() {
     await this.startNewGame();
     await this.dealStartingHands();
+  }
+
+  async componentDidUpdate() {
+    const {
+      currentPossibleDealerScores,
+      currentPossibleScores,
+      dealerPlaying
+    } = this.state;
+
+    console.log(currentPossibleDealerScores, dealerPlaying);
+
+    if (dealerPlaying === true) {
+      const dealerBust = hasBusted(currentPossibleDealerScores);
+      const dealerMustHit = mustHit(currentPossibleDealerScores);
+      if (dealerBust) this.setState({ playerWin: true, dealerPlaying: false });
+      else if (dealerMustHit) this.dealerHit();
+      else {
+        this.setState({
+          playerWin: doesPlayerWin(
+            currentPossibleDealerScores,
+            currentPossibleScores
+          ),
+          dealerPlaying: false
+        });
+      }
+    }
   }
 
   render() {
@@ -68,8 +119,7 @@ class App extends Component {
       currentPossibleScores
     } = this.state;
 
-    const canHit = currentPossibleScores.some(score => score < 21);
-    const autoLose = currentPossibleScores.every(score => score > 21);
+    const canHit = playerCanHit(currentPossibleScores);
 
     return (
       deckId && (
@@ -84,7 +134,7 @@ class App extends Component {
             ))}
           </div>
 
-          <button disabled={!canHit} onClick={this.hit}>
+          <button disabled={!canHit} onClick={this.playerHit}>
             HIT
           </button>
           <button onClick={this.stay}>STAY</button>
