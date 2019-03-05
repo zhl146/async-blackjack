@@ -12,7 +12,10 @@ export const calculateNextPossibleScores = (currentScores, newCards) => {
     nextScores.push(score + nextCard.numericalVal);
   });
 
-  return calculateNextPossibleScores(nextScores, restCards);
+  return calculateNextPossibleScores(
+    nextScores.filter(score => score < 22),
+    restCards
+  );
 };
 
 export const hasBusted = possibleScores =>

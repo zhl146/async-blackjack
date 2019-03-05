@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import "./App.css";
 import Playerarea from "./PlayerArea";
 import DealerArea from "./DealerArea";
@@ -47,7 +47,9 @@ class App extends Component {
       playerCards,
       dealerCards,
       currentPossibleScores,
-      currentPossibleDealerScores
+      currentPossibleDealerScores,
+      playerWin: null,
+      dealerPlaying: false
     });
   };
 
@@ -98,7 +100,7 @@ class App extends Component {
 
     const playerBust = hasBusted(currentPossibleScores);
 
-    if (playerBust) this.setState({ playerWin: false });
+    if (playerBust && playerWin !== false) this.setState({ playerWin: false });
 
     if (dealerPlaying === true && playerWin === null) {
       const dealerBust = hasBusted(currentPossibleDealerScores);
@@ -131,24 +133,38 @@ class App extends Component {
     console.log(playerWin);
 
     return (
-      deckId && (
-        <div className="App">
-          <DealerArea cards={dealerCards} />
-          <div style={{ height: 18, width: "100%" }} />
-          <Playerarea cards={playerCards} />
-          <div style={{ height: 18, width: "100%" }} />
-          <div>
-            {currentPossibleScores.map((score, index) => (
-              <span key={index}>{` ${score} `}</span>
-            ))}
+      <div>
+        {playerWin === true ? (
+          <div>YOU WIN</div>
+        ) : playerWin === false ? (
+          <div>YOU LOSE</div>
+        ) : null}
+        {deckId && (
+          <div className="App">
+            <DealerArea cards={dealerCards} />
+            <div style={{ height: 18, width: "100%" }} />
+            <Playerarea cards={playerCards} />
+            <div style={{ height: 18, width: "100%" }} />
+            <div>
+              {currentPossibleScores.map((score, index) => (
+                <span key={index}>{` ${score} `}</span>
+              ))}
+            </div>
+            <div>
+              {!(playerWin === true || playerWin === false) ? (
+                <Fragment>
+                  <button disabled={!canHit} onClick={this.playerHit}>
+                    HIT
+                  </button>
+                  <button onClick={this.stay}>STAY</button>
+                </Fragment>
+              ) : (
+                <button onClick={this.dealStartingHands}>PLAY AGAIN</button>
+              )}
+            </div>
           </div>
-
-          <button disabled={!canHit} onClick={this.playerHit}>
-            HIT
-          </button>
-          <button onClick={this.stay}>STAY</button>
-        </div>
-      )
+        )}
+      </div>
     );
   }
 }
