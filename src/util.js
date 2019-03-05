@@ -24,9 +24,18 @@ export const playerCanHit = possibleScores =>
 export const mustHit = possibleScores =>
   possibleScores.some(score => score < 18);
 
+const findHighestScoreUnder21 = scores =>
+  scores
+    .sort()
+    .reverse()
+    .find(score => score <= 21);
+
 export const doesPlayerWin = (dealerScores, playerScores) => {
-  const dealerHigh = dealerScores.sort().find(score => score <= 21);
-  const playerHigh = dealerScores.sort().find(score => score <= 21);
+  const dealerHigh = findHighestScoreUnder21(dealerScores);
+  const playerHigh = findHighestScoreUnder21(playerScores);
+
+  console.log(dealerHigh, dealerScores);
+  console.log(playerHigh, playerScores);
 
   return playerHigh > dealerHigh;
 };

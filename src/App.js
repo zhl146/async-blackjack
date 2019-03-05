@@ -19,7 +19,8 @@ class App extends Component {
     playerCards: [],
     dealerCards: [],
     currentPossibleScores: [0],
-    currentPossibleDealerScores: [0]
+    currentPossibleDealerScores: [0],
+    playerWin: null
   };
 
   startNewGame = async () => {
@@ -89,12 +90,17 @@ class App extends Component {
     const {
       currentPossibleDealerScores,
       currentPossibleScores,
-      dealerPlaying
+      dealerPlaying,
+      playerWin
     } = this.state;
 
     console.log(currentPossibleDealerScores, dealerPlaying);
 
-    if (dealerPlaying === true) {
+    const playerBust = hasBusted(currentPossibleScores);
+
+    if (playerBust) this.setState({ playerWin: false });
+
+    if (dealerPlaying === true && playerWin === null) {
       const dealerBust = hasBusted(currentPossibleDealerScores);
       const dealerMustHit = mustHit(currentPossibleDealerScores);
       if (dealerBust) this.setState({ playerWin: true, dealerPlaying: false });
@@ -116,10 +122,13 @@ class App extends Component {
       deckId,
       playerCards,
       dealerCards,
-      currentPossibleScores
+      currentPossibleScores,
+      playerWin
     } = this.state;
 
     const canHit = playerCanHit(currentPossibleScores);
+
+    console.log(playerWin);
 
     return (
       deckId && (
