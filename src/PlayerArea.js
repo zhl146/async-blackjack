@@ -7,8 +7,8 @@ export default class Playerarea extends React.Component {
     return (
       cards.length && (
         <div>
-          {cards.map(card => (
-            <img src={card.image} />
+          {cards.map(({ image }, index) => (
+            <img key={index} src={image} />
           ))}
         </div>
       )
