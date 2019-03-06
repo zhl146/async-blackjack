@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react";
 import "./App.css";
+
 import Playerarea from "./PlayerArea";
 import DealerArea from "./DealerArea";
 import {
@@ -146,7 +147,8 @@ class App extends Component {
       currentPossibleScores,
       playerWin,
       totalDealerWins,
-      totalPlayerWins
+      totalPlayerWins,
+      dealerPlaying
     } = this.state;
 
     const canHit = playerCanHit(currentPossibleScores);
@@ -159,7 +161,10 @@ class App extends Component {
         </div>
         {deckId && (
           <div className="App">
-            <DealerArea cards={dealerCards} />
+            <DealerArea
+              cards={dealerCards}
+              hideFirstCard={playerWin === null || dealerPlaying}
+            />
             <div style={{ height: 18, width: "100%" }} />
             <Playerarea cards={playerCards} />
             <div style={{ height: 18, width: "100%" }} />
