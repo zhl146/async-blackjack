@@ -12,21 +12,26 @@ import {
   doesPlayerWin
 } from "./util";
 
+const defaultState = {
+  deckId: null,
+  dealerPlaying: false,
+  playerCards: [],
+  dealerCards: [],
+  currentPossibleScores: [0],
+  currentPossibleDealerScores: [0],
+  playerWin: null,
+  totalPlayerWins: 0,
+  totalDealerWins: 0
+};
+
 class App extends Component {
-  state = {
-    deckId: null,
-    dealerPlaying: false,
-    playerCards: [],
-    dealerCards: [],
-    currentPossibleScores: [0],
-    currentPossibleDealerScores: [0],
-    playerWin: null
-  };
+  state = defaultState;
 
   startNewGame = async () => {
     const deckId = await getNewDeckId();
 
     this.setState({
+      ...defaultState,
       deckId
     });
   };
@@ -83,12 +88,7 @@ class App extends Component {
     });
   };
 
-  async componentDidMount() {
-    await this.startNewGame();
-    await this.dealStartingHands();
-  }
-
-  async componentDidUpdate() {
+  checkWinConditions = async () => {
     const {
       currentPossibleDealerScores,
       currentPossibleScores,
@@ -96,27 +96,46 @@ class App extends Component {
       playerWin
     } = this.state;
 
-    console.log(currentPossibleDealerScores, dealerPlaying);
-
     const playerBust = hasBusted(currentPossibleScores);
 
-    if (playerBust && playerWin !== false) this.setState({ playerWin: false });
+    if (playerBust && playerWin !== false) this.dealerWin();
 
     if (dealerPlaying === true && playerWin === null) {
       const dealerBust = hasBusted(currentPossibleDealerScores);
       const dealerMustHit = mustHit(currentPossibleDealerScores);
-      if (dealerBust) this.setState({ playerWin: true, dealerPlaying: false });
+      if (dealerBust) this.playerWin();
       else if (dealerMustHit) this.dealerHit();
       else {
-        this.setState({
-          playerWin: doesPlayerWin(
-            currentPossibleDealerScores,
-            currentPossibleScores
-          ),
-          dealerPlaying: false
-        });
+        doesPlayerWin(currentPossibleDealerScores, currentPossibleScores)
+          ? this.playerWin()
+          : this.dealerWin();
       }
     }
+  };
+
+  playerWin = () => {
+    this.setState(prevState => ({
+      playerWin: true,
+      totalPlayerWins: prevState.totalPlayerWins + 1,
+      dealerPlaying: false
+    }));
+  };
+
+  dealerWin = () => {
+    this.setState(prevState => ({
+      playerWin: false,
+      totalDealerWins: prevState.totalDealerWins + 1,
+      dealerPlaying: false
+    }));
+  };
+
+  async componentDidMount() {
+    await this.startNewGame();
+    await this.dealStartingHands();
+  }
+
+  async componentDidUpdate() {
+    this.checkWinConditions();
   }
 
   render() {
@@ -125,20 +144,19 @@ class App extends Component {
       playerCards,
       dealerCards,
       currentPossibleScores,
-      playerWin
+      playerWin,
+      totalDealerWins,
+      totalPlayerWins
     } = this.state;
 
     const canHit = playerCanHit(currentPossibleScores);
 
-    console.log(playerWin);
-
     return (
       <div>
-        {playerWin === true ? (
-          <div>YOU WIN</div>
-        ) : playerWin === false ? (
-          <div>YOU LOSE</div>
-        ) : null}
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ margin: 10 }}>{`Player: ${totalPlayerWins}`}</div>
+          <div style={{ margin: 10 }}>{`Dealer: ${totalDealerWins}`}</div>
+        </div>
         {deckId && (
           <div className="App">
             <DealerArea cards={dealerCards} />
@@ -151,6 +169,11 @@ class App extends Component {
               ))}
             </div>
             <div>
+              {playerWin === true ? (
+                <div>YOU WIN</div>
+              ) : playerWin === false ? (
+                <div>YOU LOSE</div>
+              ) : null}
               {!(playerWin === true || playerWin === false) ? (
                 <Fragment>
                   <button disabled={!canHit} onClick={this.playerHit}>
