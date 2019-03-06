@@ -1,3 +1,7 @@
+I asked this question on a whim in an interview and wanted to see how long it would take me to do it. I think it's an interesting question as it tests asynchronous development as well as game logic. I made the basic functionality work. The most annoying part is dealing with ACE edge cases and game ending. I will add betting/splitting and more complicated logic if I get time later. I think it's a fun little project and I'm glad I spent the time to do it.
+
+Special thanks to whomever created the deckofcards api for public use. It's pretty cool!
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
