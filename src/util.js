@@ -25,6 +25,7 @@ export const playerCanHit = possibleScores =>
   possibleScores.some(score => score < 21);
 
 export const mustHit = possibleScores =>
+  possibleScores.every(score => score !== 21) &&
   possibleScores.some(score => score < 18);
 
 const findHighestScoreUnder21 = scores =>
