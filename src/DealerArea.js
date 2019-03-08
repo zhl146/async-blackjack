@@ -4,10 +4,8 @@ export default class DealerArea extends React.Component {
   render() {
     const { cards, hideFirstCard } = this.props;
 
-    console.log(hideFirstCard);
-
     return (
-      cards.length && (
+      cards.length > 0 && (
         <div>
           {cards.map(({ image }, index) =>
             index === 0 && hideFirstCard ? (
